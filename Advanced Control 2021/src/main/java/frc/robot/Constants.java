@@ -28,7 +28,7 @@ public final class Constants {
         public static double kMaxVelocity = 3; // feet / s
         public static double kMaxAcceleration = 3; // feet / s^2
 
-        public static double kTrackwidth = 0.6397603419838763; // feet
+        public static double kTrackwidthMeters = 0.6397603419838763; // 2.0989512532279404 feet
     }
 
     public static class OIConstants

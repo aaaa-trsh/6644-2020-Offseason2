@@ -1,0 +1,9 @@
+{
+  "lengthUnit": "Foot",
+  "exportUnit": "Same as Project",
+  "maxVelocity": 5.0,
+  "maxAcceleration": 5.0,
+  "wheelBase": 2.0989512532279404,
+  "gameName": "Infinite Recharge",
+  "outputDir": "../../Advanced Control/src/main/deploy/paths"
+}

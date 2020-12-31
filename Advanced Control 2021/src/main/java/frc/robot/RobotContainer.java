@@ -1,26 +1,31 @@
 package frc.robot;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Path;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 public class RobotContainer {
-    private final DriveSubsystem drivebase = new DriveSubsystem();
+    DriveSubsystem drivebase = new DriveSubsystem();
     Compressor compressor = new Compressor();
     Joystick joystick = new Joystick(0);
 
@@ -35,25 +40,28 @@ public class RobotContainer {
         button.whenPressed(new InstantCommand(()->drivebase.setTransmission(true)))
             .whenReleased(new InstantCommand(()->drivebase.setTransmission(false)));
     }
-
-    public void log()
-    {
-        SmartDashboard.putNumber("Rotation", drivebase.getGyroHeading().getDegrees());
-        SmartDashboard.putNumber("X", drivebase.getPose().getTranslation().getX());
-        SmartDashboard.putNumber("Y", drivebase.getPose().getTranslation().getY());
-        SmartDashboard.putNumber("left", drivebase.getLeftEncoder().getDistance());
-        SmartDashboard.putNumber("right", drivebase.getRightEncoder().getDistance());
-    }
-    public Command getAutonomousCommand() {
+    
+    public Command ramseteCommand(String trajectoryJSON) {
         TrajectoryConfig config = new TrajectoryConfig(
             Units.feetToMeters(2.0), Units.feetToMeters(2.0));
         config.setKinematics(drivebase.getKinematics());
-    
+        
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-            Arrays.asList(new Pose2d(), new Pose2d(3.0, 2, Rotation2d.fromDegrees(20))),
+            new Pose2d(0, 0, new Rotation2d(0)),
+            null,
+            new Pose2d(0, 0, new Rotation2d(0)),
             config
         );
-    
+
+        try {
+            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+            trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+        } catch (IOException ex) {
+            DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+        }
+        
+        drivebase.resetOdometry(trajectory.getInitialPose());
+
         RamseteCommand command = new RamseteCommand(
             trajectory,
             drivebase::getPose,
@@ -70,8 +78,14 @@ public class RobotContainer {
         return command.andThen(() -> drivebase.tankDriveVolts(0, 0));
     }
 
-    public void reset()
+    public Command getAutonomousCommand()
     {
-        drivebase.resetOdometry();
+        return new SequentialCommandGroup(
+            ramseteCommand("paths\\output\\CurveIn.wpilib.json"), 
+            new InstantCommand(()->drivebase.setTransmission(true)), 
+            new WaitCommand(1), 
+            new InstantCommand(()->drivebase.setTransmission(false)), 
+            ramseteCommand("paths\\output\\CurveOut.wpilib.json")
+        );
     }
 }

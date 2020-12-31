@@ -12,14 +12,17 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
-public class DriveSubsystem extends SubsystemBase 
+public class DriveSubsystem extends SubsystemBase
 {
     Encoder leftEncoder = new Encoder(DriveConstants.kLeftEncoderPorts[0], DriveConstants.kLeftEncoderPorts[1], true);
     Encoder rightEncoder = new Encoder(DriveConstants.kRightEncoderPorts[0], DriveConstants.kRightEncoderPorts[1], false);
@@ -35,16 +38,18 @@ public class DriveSubsystem extends SubsystemBase
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveConstants.kS, DriveConstants.kV, DriveConstants.kA);
 
-    AHRS gyro = new AHRS(SPI.Port.kMXP);
+    Gyro gyro = new AHRS(SPI.Port.kMXP);
 
     DifferentialDrive differentialDrive = new DifferentialDrive(leftFront, rightFront);
-    DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Units.feetToMeters(DriveConstants.kTrackwidth));
+    DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(DriveConstants.kTrackwidthMeters);
     DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0, 0, new Rotation2d()));
     
     Pose2d pose;
 
     Solenoid transmissionSolenoidL = new Solenoid(0);
     Solenoid transmissionSolenoidR = new Solenoid(1);
+
+    Field2d field;
 
     public DriveSubsystem() 
     {
@@ -71,9 +76,16 @@ public class DriveSubsystem extends SubsystemBase
         rightEncoder.reset();
         leftEncoder.setDistancePerPulse(DriveConstants.kDriveEncoderDPP);
         rightEncoder.setDistancePerPulse(DriveConstants.kDriveEncoderDPP);
+
+        SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
+        SmartDashboard.putNumber("X", getPose().getTranslation().getX());
+        SmartDashboard.putNumber("Y", getPose().getTranslation().getY());
+        SmartDashboard.putNumber("left", getLeftEncoder().getDistance());
+        SmartDashboard.putNumber("right", getRightEncoder().getDistance());
+        SmartDashboard.putData("Field", field);
     }
 
-    public void setTransmission(boolean on) {
+    public void setTransmission(final boolean on) {
         transmissionSolenoidL.set(on);
         transmissionSolenoidR.set(on);
     }
@@ -81,53 +93,57 @@ public class DriveSubsystem extends SubsystemBase
     public Rotation2d getGyroHeading() {
         return Rotation2d.fromDegrees(-gyro.getAngle());
     }
+
     public Encoder getLeftEncoder() {
         return leftEncoder;
     }
+
     public Encoder getRightEncoder() {
         return rightEncoder;
     }
+
     public DifferentialDriveWheelSpeeds getSpeeds() {
         return new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
     }
 
     @Override
     public void periodic() {
-        pose = odometry.update(getGyroHeading(), leftEncoder.getDistance(), rightEncoder.getDistance());
+        pose = odometry.update(getGyroHeading(), Units.feetToMeters(leftEncoder.getDistance()), Units.feetToMeters(rightEncoder.getDistance()));
+        field.setRobotPose(odometry.getPoseMeters());
     }
 
-    public void tankDriveVolts(double leftVolts, double rightVolts) {
+    public void tankDriveVolts(final double leftVolts, final double rightVolts) {
         differentialDrive.tankDrive(leftVolts / 12, rightVolts / 12);
     }
 
-    public void arcadeDrive(double forward, double turn) {
+    public void arcadeDrive(final double forward, final double turn) {
         differentialDrive.arcadeDrive(-forward, -turn);
     }
 
-	public DifferentialDriveKinematics getKinematics() {
-		return kinematics;
-	}
+    public DifferentialDriveKinematics getKinematics() {
+        return kinematics;
+    }
 
-	public SimpleMotorFeedforward getFeedforward() {
-		return feedforward;
-	}
+    public SimpleMotorFeedforward getFeedforward() {
+        return feedforward;
+    }
 
-	public PIDController getLeftPIDController() {
-		return leftController;
+    public PIDController getLeftPIDController() {
+        return leftController;
     }
 
     public PIDController getRightPIDController() {
-		return rightController;
+        return rightController;
     }
-    
-    public Pose2d getPose() {
-		return pose;
-	}
 
-	public void resetOdometry() {
+    public Pose2d getPose() {
+        return pose;
+    }
+
+    public void resetOdometry(final Pose2d pose2d) {
         leftEncoder.reset();
         rightEncoder.reset();
         gyro.reset();
-        odometry.resetPosition(new Pose2d(), getGyroHeading());
+        odometry.resetPosition(pose2d, getGyroHeading());
     }
 }
