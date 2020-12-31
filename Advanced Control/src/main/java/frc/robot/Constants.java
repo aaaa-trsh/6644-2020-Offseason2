@@ -1,7 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.util.Units;
-
 public final class Constants {
     public static class DriveConstants
     {
@@ -25,7 +23,7 @@ public final class Constants {
 
         public static int kDriveEncoderResolution = 360;
         public static double kWheelDiameter = 6; // inches
-        public static double kDriveEncoderDPP = (kWheelDiameter * Math.PI)/kDriveEncoderResolution/12   ;
+        public static double kDriveEncoderDPP = (kWheelDiameter * Math.PI)/kDriveEncoderResolution/12;
 
         public static double kMaxVelocity = 3; // feet / s
         public static double kMaxAcceleration = 3; // feet / s^2
