@@ -78,6 +78,7 @@ public class Robot extends TimedRobot {
 
     SpeedController[] rightMotors = new SpeedController[1];
     rightMotors[0] = new WPI_VictorSPX(3);
+    rightMotors[0].setInverted(true);
 
     //
     // Configure gyro
@@ -85,8 +86,9 @@ public class Robot extends TimedRobot {
 
     // Note that the angle from the NavX and all implementors of wpilib Gyro
     // must be negated because getAngle returns a clockwise positive angle
-    AHRS navx = new AHRS(SPI.Port.kMXP);
-    gyroAngleRadians = () -> -1 * Math.toRadians(navx.getAngle());
+    ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+    gyro.calibrate();
+    gyroAngleRadians = () -> -1 * Math.toRadians(gyro.getAngle());
 
     //
     // Configure drivetrain movement
@@ -104,7 +106,7 @@ public class Robot extends TimedRobot {
     // units and units/s
     //
 
-    double encoderConstant = (1 / ENCODER_EDGES_PER_REV) * WHEEL_DIAMETER * Math.PI;
+    double encoderConstant = (6 * Math.PI)/360/12;
 
     Encoder leftEncoder = new Encoder(0, 1);
     leftEncoder.setReverseDirection(true);
