@@ -9,10 +9,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.subsystems.*;
@@ -46,20 +44,16 @@ public class RobotContainer {
             Units.feetToMeters(2.0), Units.feetToMeters(2.0));
         config.setKinematics(drivebase.getKinematics());
         
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-            new Pose2d(0, 0, new Rotation2d(0)),
-            null,
-            new Pose2d(0, 0, new Rotation2d(0)),
-            config
-        );
+        Path trajectoryPath = null;
+        Trajectory trajectory = null;
 
-        try {
-            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+        try {            
+            trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
             trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
         } catch (IOException ex) {
             DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
         }
-        
+
         drivebase.resetOdometry(trajectory.getInitialPose());
 
         RamseteCommand command = new RamseteCommand(
@@ -74,18 +68,27 @@ public class RobotContainer {
             drivebase::tankDriveVolts,
             drivebase
         );
-    
+        
         return command.andThen(() -> drivebase.tankDriveVolts(0, 0));
     }
 
     public Command getAutonomousCommand()
     {
         return new SequentialCommandGroup(
-            ramseteCommand("paths\\output\\CurveIn.wpilib.json"), 
+            ramseteCommand("paths/output/p1.wpilib.json"), 
+            new InstantCommand(()->drivebase.tankDriveVolts(0, 0)), 
+            new WaitCommand(2), 
             new InstantCommand(()->drivebase.setTransmission(true)), 
             new WaitCommand(1), 
             new InstantCommand(()->drivebase.setTransmission(false)), 
-            ramseteCommand("paths\\output\\CurveOut.wpilib.json")
+            new WaitCommand(2), 
+            ramseteCommand("paths/output/p2.wpilib.json"),
+            new InstantCommand(()->drivebase.tankDriveVolts(0, 0))
         );
+    }
+
+    public void reset()
+    {
+        drivebase.resetOdometry(new Pose2d());
     }
 }

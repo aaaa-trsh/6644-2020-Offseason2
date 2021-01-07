@@ -13,7 +13,7 @@ public final class Constants {
         public static double kV = 7.31;
         public static double kA = 0.443;
 
-        public static double kP = 1.1;
+        public static double kP = 1;
         public static double kI = 0;
         public static double kD = 0;
 

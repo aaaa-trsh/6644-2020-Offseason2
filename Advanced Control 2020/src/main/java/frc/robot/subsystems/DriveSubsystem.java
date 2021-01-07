@@ -4,9 +4,11 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -38,7 +40,7 @@ public class DriveSubsystem extends SubsystemBase
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveConstants.kS, DriveConstants.kV, DriveConstants.kA);
 
-    Gyro gyro = new AHRS(SPI.Port.kMXP);
+    Gyro gyro = new ADXRS450_Gyro(Port.kOnboardCS0);
 
     DifferentialDrive differentialDrive = new DifferentialDrive(leftFront, rightFront);
     DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(DriveConstants.kTrackwidthMeters);
@@ -53,6 +55,7 @@ public class DriveSubsystem extends SubsystemBase
 
     public DriveSubsystem() 
     {
+        gyro.calibrate();
         leftFront.configFactoryDefault();
         leftFollower.configFactoryDefault();
         rightFront.configFactoryDefault();
@@ -76,6 +79,8 @@ public class DriveSubsystem extends SubsystemBase
         rightEncoder.reset();
         leftEncoder.setDistancePerPulse(DriveConstants.kDriveEncoderDPP);
         rightEncoder.setDistancePerPulse(DriveConstants.kDriveEncoderDPP);
+
+        pose = odometry.getPoseMeters();
 
         SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
         SmartDashboard.putNumber("X", getPose().getTranslation().getX());
