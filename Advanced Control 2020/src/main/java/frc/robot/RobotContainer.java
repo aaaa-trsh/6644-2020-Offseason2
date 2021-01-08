@@ -2,6 +2,7 @@ package frc.robot;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -9,8 +10,11 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.subsystems.*;
@@ -44,15 +48,27 @@ public class RobotContainer {
             Units.feetToMeters(2.0), Units.feetToMeters(2.0));
         config.setKinematics(drivebase.getKinematics());
         
-        Path trajectoryPath = null;
-        Trajectory trajectory = null;
-
-        try {            
+        //Path trajectoryPath = null;
+        //Trajectory trajectory = null;
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+            // Start at the origin facing the +X direction
+            new Pose2d(0, 0, new Rotation2d(0)),
+            // Pass through these two interior waypoints, making an 's' curve path
+            List.of(
+                new Translation2d(1, 1),
+                new Translation2d(2, -1)
+            ),
+            // End 3 meters straight ahead of where we started, facing forward
+            new Pose2d(3, 0, new Rotation2d(0)),
+            // Pass config
+            config
+        );
+        /*try {            
             trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
             trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
         } catch (IOException ex) {
             DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
-        }
+        }*/
 
         drivebase.resetOdometry(trajectory.getInitialPose());
 
@@ -81,8 +97,6 @@ public class RobotContainer {
             new InstantCommand(()->drivebase.setTransmission(true)), 
             new WaitCommand(1), 
             new InstantCommand(()->drivebase.setTransmission(false)), 
-            new WaitCommand(2), 
-            ramseteCommand("paths/output/p2.wpilib.json"),
             new InstantCommand(()->drivebase.tankDriveVolts(0, 0))
         );
     }

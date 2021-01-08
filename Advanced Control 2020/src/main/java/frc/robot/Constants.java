@@ -9,11 +9,11 @@ public final class Constants {
         public static int[] kLeftEncoderPorts = {0, 1};
         public static int[] kRightEncoderPorts = {2, 3};
 
-        public static double kS = 0.99;
-        public static double kV = 7.31;
-        public static double kA = 0.443;
+        public static double kS = 0.977;
+        public static double kV = 2.28;
+        public static double kA = 0.0569;
 
-        public static double kP = 1;
+        public static double kP = 1.1;
         public static double kI = 0;
         public static double kD = 0;
 

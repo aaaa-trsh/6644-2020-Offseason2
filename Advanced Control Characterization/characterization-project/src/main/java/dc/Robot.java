@@ -78,7 +78,6 @@ public class Robot extends TimedRobot {
 
     SpeedController[] rightMotors = new SpeedController[1];
     rightMotors[0] = new WPI_VictorSPX(3);
-    rightMotors[0].setInverted(true);
 
     //
     // Configure gyro
