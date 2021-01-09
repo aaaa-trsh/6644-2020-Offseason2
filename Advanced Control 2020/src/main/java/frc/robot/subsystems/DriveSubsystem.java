@@ -34,7 +34,7 @@ public class DriveSubsystem extends SubsystemBase
 
     PIDController leftController = new PIDController(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD);
     PIDController rightController = new PIDController(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD);
-    PIDController headingController = new PIDController(DriveConstants.kTurnP, DriveConstants.kTurnI, DriveConstants.kTurnD);
+    //PIDController headingController = new PIDController(DriveConstants.kTurnP, DriveConstants.kTurnI, DriveConstants.kTurnD);
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveConstants.kS, DriveConstants.kV, DriveConstants.kA);
 
@@ -61,11 +61,11 @@ public class DriveSubsystem extends SubsystemBase
 
         leftFront.setInverted(InvertType.None);
         rightFront.setInverted(InvertType.InvertMotorOutput);
-
+        /*
         leftFront.configOpenloopRamp(.5);
         leftFollower.configOpenloopRamp(.5);
         rightFront.configOpenloopRamp(.5);
-        rightFollower.configOpenloopRamp(.5);
+        rightFollower.configOpenloopRamp(.5);*/
 
         leftFollower.follow(leftFront);
         rightFollower.follow(rightFront);
@@ -80,11 +80,7 @@ public class DriveSubsystem extends SubsystemBase
 
         pose = odometry.getPoseMeters();
 
-        SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
-        SmartDashboard.putNumber("X", getPose().getTranslation().getX());
-        SmartDashboard.putNumber("Y", getPose().getTranslation().getY());
-        SmartDashboard.putNumber("left", getLeftEncoder().getDistance());
-        SmartDashboard.putNumber("right", getRightEncoder().getDistance());
+        
         //SmartDashboard.putData("Field", field);
     }
 
@@ -94,7 +90,7 @@ public class DriveSubsystem extends SubsystemBase
     }
 
     public Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(-gyro.getAngle());
+        return Rotation2d.fromDegrees(gyro.getAngle());
     }
 
     public Encoder getLeftEncoder() {
@@ -111,8 +107,14 @@ public class DriveSubsystem extends SubsystemBase
 
     @Override
     public void periodic() {
-        pose = odometry.update(getGyroHeading(), Units.feetToMeters(leftEncoder.getDistance()), Units.feetToMeters(rightEncoder.getDistance()));
+        pose = odometry.update(getGyroHeading(), leftEncoder.getDistance(), rightEncoder.getDistance());
         //field.setRobotPose(odometry.getPoseMeters());
+        SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
+        SmartDashboard.putNumber("X", getPose().getTranslation().getX());
+        SmartDashboard.putNumber("Y", getPose().getTranslation().getY());
+        //SmartDashboard.putData("Pose", getPose());
+        SmartDashboard.putNumber("left", getLeftEncoder().getDistance());
+        SmartDashboard.putNumber("right", getRightEncoder().getDistance());
     }
 
     public void tankDriveVolts(final double leftVolts, final double rightVolts) {
@@ -143,10 +145,13 @@ public class DriveSubsystem extends SubsystemBase
         return odometry.getPoseMeters();
     }
 
-    public void resetOdometry(final Pose2d pose2d) {
+    public void resetOdometry(Pose2d pose2d) {
         leftEncoder.reset();
         rightEncoder.reset();
-        gyro.reset();
         odometry.resetPosition(pose2d, getGyroHeading());
+    }
+
+    public void resetGyro() {
+        gyro.reset();
     }
 }

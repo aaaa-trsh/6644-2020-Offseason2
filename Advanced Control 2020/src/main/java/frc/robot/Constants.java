@@ -15,7 +15,7 @@ public final class Constants {
         public static double kV = 2.28;
         public static double kA = 0.0569;
 
-        public static double kP = 1.1;
+        public static double kP = 8;
         public static double kI = 0;
         public static double kD = 0;
 

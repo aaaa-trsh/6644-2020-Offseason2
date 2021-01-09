@@ -53,7 +53,7 @@ public class RobotContainer {
             10);
             
         TrajectoryConfig config = new TrajectoryConfig(
-            Units.feetToMeters(2.0), Units.feetToMeters(2.0));
+            Units.feetToMeters(5.0), Units.feetToMeters(5.0));
         config.setKinematics(drivebase.getKinematics());
         config.addConstraint(autoVoltageConstraint);
         
@@ -64,8 +64,8 @@ public class RobotContainer {
             new Pose2d(0, 0, new Rotation2d(0)),
             // Pass through these two interior waypoints, making an 's' curve path
             List.of(
-                new Translation2d(1, 1),
-                new Translation2d(2, -1)
+                new Translation2d(1, 2),
+                new Translation2d(2, -2)
             ),
             // End 3 meters straight ahead of where we started, facing forward
             new Pose2d(3, 0, new Rotation2d(0)),
@@ -103,18 +103,19 @@ public class RobotContainer {
     public Command getAutonomousCommand()
     {
         return new SequentialCommandGroup(
+            new InstantCommand(()->drivebase.setTransmission(false)), 
             ramseteCommand("paths/output/p1.wpilib.json"), 
             new InstantCommand(()->drivebase.tankDriveVolts(0, 0)), 
-            new WaitCommand(2), 
             new InstantCommand(()->drivebase.setTransmission(true)), 
-            new WaitCommand(1), 
+            new WaitCommand(.2), 
             new InstantCommand(()->drivebase.setTransmission(false)), 
             new InstantCommand(()->drivebase.tankDriveVolts(0, 0))
         );
     }
 
-    public void reset()
+    public void resetOdometry()
     {
+        drivebase.resetGyro();
         drivebase.resetOdometry(new Pose2d());
     }
 }
