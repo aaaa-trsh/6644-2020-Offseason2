@@ -1,17 +1,23 @@
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.Constants.DriveConstants;
@@ -43,7 +49,7 @@ public class RobotContainer {
     
     public Command ramseteCommand(String trajectoryJSON) 
     {
-        DifferentialDriveVoltageConstraint autoVoltageConstraint = 
+        /*DifferentialDriveVoltageConstraint autoVoltageConstraint = 
         new DifferentialDriveVoltageConstraint(
             new SimpleMotorFeedforward(
                 DriveConstants.kS,
@@ -57,8 +63,7 @@ public class RobotContainer {
         config.setKinematics(drivebase.getKinematics());
         config.addConstraint(autoVoltageConstraint);
         
-        //Path trajectoryPath = null;
-        //Trajectory trajectory = null;
+        
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
             // Start at the origin facing the +X direction
             new Pose2d(0, 0, new Rotation2d(0)),
@@ -71,15 +76,18 @@ public class RobotContainer {
             new Pose2d(3, 0, new Rotation2d(0)),
             // Pass config
             config
-        );
-        /*try {            
+        );*/
+
+        Path trajectoryPath = null;
+        Trajectory trajectory = null;
+        try {            
             trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
             trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
         } catch (IOException ex) {
             DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
-        }*/
+        }
 
-        drivebase.resetOdometry(trajectory.getInitialPose());
+        trajectory = trajectory.transformBy(drivebase.getPose().minus(trajectory.getInitialPose()));
 
         RamseteCommand command = new RamseteCommand(
             trajectory,
@@ -104,7 +112,7 @@ public class RobotContainer {
     {
         return new SequentialCommandGroup(
             new InstantCommand(()->drivebase.setTransmission(false)), 
-            ramseteCommand("paths/output/p1.wpilib.json"), 
+            ramseteCommand("paths/AutoNav_Barrel.wpilib.json"), 
             new InstantCommand(()->drivebase.tankDriveVolts(0, 0)), 
             new InstantCommand(()->drivebase.setTransmission(true)), 
             new WaitCommand(.2), 
