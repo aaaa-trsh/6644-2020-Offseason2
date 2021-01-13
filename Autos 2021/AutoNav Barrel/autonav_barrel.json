@@ -1,0 +1,10 @@
+{
+  "game": "autonav_barrel",
+  "field-image": "autonav_barrel.png",
+  "field-corners": {
+    "top-left": [ 127, 24 ],
+    "bottom-right": [ 937, 429 ]
+  },
+  "field-size": [ 30, 15 ],
+  "field-unit": "feet"
+}

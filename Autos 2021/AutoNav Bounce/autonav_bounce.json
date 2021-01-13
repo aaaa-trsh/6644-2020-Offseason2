@@ -1,0 +1,10 @@
+{
+  "game": "autonav_bounce",
+  "field-image": "autonav_bounce.png",
+  "field-corners": {
+    "top-left": [ 140, 41 ],
+    "bottom-right": [ 950, 446 ]
+  },
+  "field-size": [ 30, 15 ],
+  "field-unit": "feet"
+}

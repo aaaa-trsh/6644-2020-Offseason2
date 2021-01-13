@@ -1,0 +1,10 @@
+{
+  "game": "autonav_slalom",
+  "field-image": "autonav_slalom.png",
+  "field-corners": {
+    "top-left": [ 130, 39 ],
+    "bottom-right": [ 940, 444 ]
+  },
+  "field-size": [ 30, 15 ],
+  "field-unit": "feet"
+}
