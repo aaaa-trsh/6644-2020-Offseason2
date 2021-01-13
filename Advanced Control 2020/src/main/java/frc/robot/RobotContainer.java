@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -87,7 +88,13 @@ public class RobotContainer {
             DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
         }
 
-        trajectory = trajectory.transformBy(drivebase.getPose().minus(trajectory.getInitialPose()));
+        //trajectory = trajectory.transformBy(drivebase.getPose().minus(trajectory.getInitialPose()));
+        drivebase.resetOdometry(trajectory.getInitialPose());
+        var table = NetworkTableInstance.getDefault().getTable("troubleshooting");
+        var leftReference = table.getEntry("left_reference");
+        var leftMeasurement = table.getEntry("left_measurement");
+        var rightReference = table.getEntry("right_reference");
+        var rightMeasurement = table.getEntry("right_measurement");
 
         RamseteCommand command = new RamseteCommand(
             trajectory,
@@ -101,7 +108,14 @@ public class RobotContainer {
             drivebase::getSpeeds,
             drivebase.getLeftPIDController(),
             drivebase.getRightPIDController(),
-            drivebase::tankDriveVolts,
+            (leftVolts, rightVolts) -> {
+                drivebase.tankDriveVolts(leftVolts, rightVolts);
+                leftMeasurement.setNumber(drivebase.getSpeeds().leftMetersPerSecond);
+                leftReference.setNumber(drivebase.getLeftPIDController().getSetpoint());
+
+                rightMeasurement.setNumber(drivebase.getSpeeds().rightMetersPerSecond);
+                rightReference.setNumber(drivebase.getLeftPIDController().getSetpoint());
+            },
             drivebase
         );
         
@@ -111,8 +125,8 @@ public class RobotContainer {
     public Command getAutonomousCommand()
     {
         return new SequentialCommandGroup(
-            new InstantCommand(()->drivebase.setTransmission(false)), 
-            ramseteCommand("paths/AutoNav_Barrel.wpilib.json"), 
+            new InstantCommand(()->drivebase.setTransmission(true)), 
+            ramseteCommand("paths/AutoNav_Bounce.wpilib.json"), 
             new InstantCommand(()->drivebase.tankDriveVolts(0, 0)), 
             new InstantCommand(()->drivebase.setTransmission(true)), 
             new WaitCommand(.2), 

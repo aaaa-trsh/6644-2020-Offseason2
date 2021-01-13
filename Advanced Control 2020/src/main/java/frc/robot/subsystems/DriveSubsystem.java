@@ -107,7 +107,7 @@ public class DriveSubsystem extends SubsystemBase
 
     @Override
     public void periodic() {
-        pose = odometry.update(getGyroHeading(), leftEncoder.getDistance(), rightEncoder.getDistance());
+        pose = odometry.update(getGyroHeading(), leftEncoder.getDistance()*2, rightEncoder.getDistance()*2);
         //field.setRobotPose(odometry.getPoseMeters());
         SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
         SmartDashboard.putNumber("X", getPose().getTranslation().getX());
@@ -128,7 +128,7 @@ public class DriveSubsystem extends SubsystemBase
     public DifferentialDriveKinematics getKinematics() {
         return kinematics;
     }
-
+    
     public SimpleMotorFeedforward getFeedforward() {
         return feedforward;
     }
