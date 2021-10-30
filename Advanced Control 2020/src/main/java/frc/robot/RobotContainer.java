@@ -43,10 +43,10 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         drivebase.setDefaultCommand(new RunCommand(() -> drivebase.arcadeDrive(joystick.getY(), joystick.getX()), drivebase));
-        JoystickButton button = new JoystickButton(joystick, 1);
-        button.whenPressed(new InstantCommand(()->drivebase.setTransmission(true)))
+        //JoystickButton button = new JoystickButton(joystick, 1);
+        /*button.whenPressed(new InstantCommand(()->drivebase.setTransmission(true)))
             .whenReleased(new InstantCommand(()->drivebase.setTransmission(false)));
-    }
+    */}
     
     public Command ramseteCommand(String trajectoryJSON) 
     {

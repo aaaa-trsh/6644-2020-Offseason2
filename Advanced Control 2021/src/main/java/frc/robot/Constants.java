@@ -10,16 +10,16 @@ public final class Constants {
         public static int[] kRightEncoderPorts = {2, 3};
 
         public static double kS = 0.99;
-        public static double kV = 7.31;
-        public static double kA = 0.443;
+        public static double kV = 4.31;
+        public static double kA = 2.443;
 
-        public static double kP = 1.1;
-        public static double kI = 0;
-        public static double kD = 0;
+        public static double kP = 20;
+        public static double kI = .2;
+        public static double kD = 0.3;
 
-        public static double kTurnP = 0;
-        public static double kTurnI = 0;
-        public static double kTurnD = 0;
+        public static double kTurnP = .02;
+        public static double kTurnI = 0.0;
+        public static double kTurnD = 0.003;
 
         public static int kDriveEncoderResolution = 360;
         public static double kWheelDiameter = 6; // inches

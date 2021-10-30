@@ -17,11 +17,11 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.wpilibj.util.Units;//penisx
 //import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-
+// penispenispenis
 public class DriveSubsystem extends SubsystemBase
 {
     Encoder leftEncoder = new Encoder(DriveConstants.kLeftEncoderPorts[0], DriveConstants.kLeftEncoderPorts[1], true);
@@ -53,6 +53,7 @@ public class DriveSubsystem extends SubsystemBase
 
     public DriveSubsystem() 
     {
+        differentialDrive.setMaxOutput(0.2);
         gyro.calibrate();
         leftFront.configFactoryDefault();
         leftFollower.configFactoryDefault();

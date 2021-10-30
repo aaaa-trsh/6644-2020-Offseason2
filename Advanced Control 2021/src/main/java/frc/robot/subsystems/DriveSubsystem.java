@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+// import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
@@ -44,12 +44,12 @@ public class DriveSubsystem extends SubsystemBase
     DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(DriveConstants.kTrackwidthMeters);
     DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0, 0, new Rotation2d()));
     
-    Pose2d pose;
+    Pose2d pose = new Pose2d();
 
     Solenoid transmissionSolenoidL = new Solenoid(0);
     Solenoid transmissionSolenoidR = new Solenoid(1);
 
-    Field2d field;
+    // Field2d field;
 
     public DriveSubsystem() 
     {
@@ -77,12 +77,12 @@ public class DriveSubsystem extends SubsystemBase
         leftEncoder.setDistancePerPulse(DriveConstants.kDriveEncoderDPP);
         rightEncoder.setDistancePerPulse(DriveConstants.kDriveEncoderDPP);
 
-        SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
-        SmartDashboard.putNumber("X", getPose().getTranslation().getX());
-        SmartDashboard.putNumber("Y", getPose().getTranslation().getY());
-        SmartDashboard.putNumber("left", getLeftEncoder().getDistance());
-        SmartDashboard.putNumber("right", getRightEncoder().getDistance());
-        SmartDashboard.putData("Field", field);
+        // SmartDashboard.putNumber("Rotation", getGyroHeading().getDegrees());
+        // SmartDashboard.putNumber("X", getPose().getTranslation().getX());
+        // SmartDashboard.putNumber("Y", getPose().getTranslation().getY());
+        // SmartDashboard.putNumber("left", getLeftEncoder().getDistance());
+        // SmartDashboard.putNumber("right", getRightEncoder().getDistance());
+        // SmartDashboard.putData("Field", field);
     }
 
     public void setTransmission(final boolean on) {
@@ -91,7 +91,10 @@ public class DriveSubsystem extends SubsystemBase
     }
 
     public Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(-gyro.getAngle());
+        return Rotation2d.fromDegrees((double)getGyroAngle());
+    }
+    public double getGyroAngle() {
+        return gyro.getAngle();
     }
 
     public Encoder getLeftEncoder() {
@@ -109,11 +112,12 @@ public class DriveSubsystem extends SubsystemBase
     @Override
     public void periodic() {
         pose = odometry.update(getGyroHeading(), Units.feetToMeters(leftEncoder.getDistance()), Units.feetToMeters(rightEncoder.getDistance()));
-        field.setRobotPose(odometry.getPoseMeters());
+        // field.setRobotPose(odometry.getPoseMeters());
     }
 
     public void tankDriveVolts(final double leftVolts, final double rightVolts) {
         differentialDrive.tankDrive(leftVolts / 12, rightVolts / 12);
+        System.out.println(pose.getX() + " " + pose.getY());
     }
 
     public void arcadeDrive(final double forward, final double turn) {
